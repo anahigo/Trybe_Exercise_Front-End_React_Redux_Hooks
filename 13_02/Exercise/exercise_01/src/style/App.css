@@ -1,0 +1,15 @@
+.App {
+  align-items: center;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  margin: 20px;
+}
+
+.nav {
+  margin-left: 60px;
+  display: flex;
+  justify-content: space-around;
+  align-self: center;
+  width: 300px;
+}

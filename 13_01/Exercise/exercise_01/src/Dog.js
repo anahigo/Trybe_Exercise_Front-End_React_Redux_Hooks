@@ -3,80 +3,69 @@ import React, { Component } from 'react';
 class Dog extends Component {
   constructor() {
     super();
-
-    this.saveDog = this.saveDog.bind(this);
-    this.fetchDog = this.fetchDog.bind(this);
-
+    console.log('constructor');
     this.state = {
-      data: "",
-      name: "",
-      array: [],
-    }
+      picture: undefined,
+      loading: true,
+      storedPictures: [],
+    };
+    this.savePicture = this.savePicture.bind(this);
+    this.renderPictureElement = this.renderPictureElement.bind(this);
+    this.fetchPicture = this.fetchPicture.bind(this);
   }
 
-  fetchDog() {
-    fetch("https://dog.ceo/api/breeds/image/random")
-      .then(res => res.json())
-      .then(result => this.setState({ data: result }));
-  }
-
-  saveDog() {
-    const {
-      data: { message },
-      name,
-      array
-    } = this.setState;
-    const dogData = { message, name };
-    const newArray= { ...array, dogData };
-    this.setState({ array: newArray });
-    this.setState({ name: "" });
+  async fetchPicture() {
+    this.setState(
+      {loading: true},
+      async () => {
+        const requestReturn = await fetch('https://dog.ceo/api/breeds/image/random')
+        const requestObject = await requestReturn.json()
+        this.setState({
+         picture: requestObject.message,
+         loading: false
+        })
+      }
+    )
   }
 
   componentDidMount() {
-    if (localStorage.dogURL) {
-      const parseStorage = JSON.parse(localStorage.dogURL);
-      const lastDog = parseStorage[parseStorage.length - 1].message;
-      return this.setState({
-        data: { message: lastDog }
-      });
-    }
-    this.fetchDog
+    if(localStorage.length !== 0) {
+      this.setState({
+        picture: localStorage.image
+      })
+    } 
+    this.fetchPicture();
   }
 
-  shouldComponentUpdate(nextProp, nextState) {
-    if (nextState.data.message.includes("terrier")) {
-      return false;
-    }
-    return true;
+  savePicture() {
+    this.setState(({ storedPictures, picture}) => ({
+      storedPictures: [...storedPictures, picture]
+    }))
+    this.fetchPicture();
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.data !== this.state.data) {
-      const dogBreed = this.state.data.message.split("/")[4];
-      return alert(dogBreed);
-    }
+  renderPictureElement() {
+    const imageURL = this.state.picture;
+    localStorage.setItem('image', `${imageURL}`)
+    return (<div className='last-dog'>
+      <h2>{imageURL.split('/')[4]}</h2>
+      <img src={imageURL} className='last-picture' alt={imageURL.split('/')[4]} />
+    </div>)
   }
 
   render() {
-    if (this.state.data === "") return "loading..."
+    const loadingElement = <span>Loading...</span>
     return (
-      <div>
-        <p>Doguinhos</p>
-        <button conClick={this.fecthDog}>Novo doguinho!</button>
-        <div>
-          <input 
-            type="text"
-            value={this.state.name}
-            onChange={e => this.setState({name: e.target.value})}
-            placeholder="digite o nome do doguinho"
-          />
-          <button conClick={this.saveData}>Salvar doguinho!</button>
+      <div className="pictures-container">
+        <div className="pictures-container-1">
+          {this.state.storedPictures.map((url, index) => (<img key={index} src={url} className ='picture' alt={url.split('/')[4]}/>))}
         </div>
-        <div>
-          <img src={this.state.data.message} alt={this.state.data.message} />
+        <div className="pictures-container-2">
+          {this.state.loading ? loadingElement : this.renderPictureElement() }
+          <button onClick={this.savePicture}>NEW DOG!</button>
         </div>
       </div>
-    );
+    )
   }
 }
 

@@ -1,0 +1,15 @@
+.pokemon-details {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+}
+
+.locations {
+  display: flex;
+  justify-content: center;
+}
+
+.pokemon-locations {
+  margin: 10px;
+}
